@@ -43,7 +43,6 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import java.util.concurrent.ScheduledExecutorService;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 import javax.inject.Inject;
@@ -70,8 +69,9 @@ import net.runelite.client.config.ConfigManager;
 import net.runelite.client.config.OpenOSRSConfig;
 import net.runelite.client.config.RuneLiteConfig;
 import net.runelite.client.eventbus.EventBus;
-import net.runelite.client.eventbus.Subscribe;
 import net.runelite.client.events.ConfigChanged;
+import net.runelite.client.events.ExternalPluginChanged;
+import net.runelite.client.events.ExternalPluginsLoaded;
 import net.runelite.client.events.PluginChanged;
 import net.runelite.client.plugins.Plugin;
 import net.runelite.client.plugins.PluginDescriptor;
@@ -108,7 +108,6 @@ public class PluginListPanel extends PluginPanel
 
 	private final ConfigManager configManager;
 	private final PluginManager pluginManager;
-	private final ScheduledExecutorService executorService;
 	private final Provider<ConfigPanel> configPanelProvider;
 	private final OpenOSRSConfig openOSRSConfig;
 	private final List<PluginConfigurationDescriptor> fakePlugins = new ArrayList<>();
@@ -140,7 +139,6 @@ public class PluginListPanel extends PluginPanel
 	public PluginListPanel(
 		ConfigManager configManager,
 		PluginManager pluginManager,
-		ScheduledExecutorService executorService,
 		Provider<ConfigPanel> configPanelProvider,
 		OpenOSRSConfig openOSRSConfig,
 		EventBus eventBus)
@@ -149,7 +147,6 @@ public class PluginListPanel extends PluginPanel
 
 		this.configManager = configManager;
 		this.pluginManager = pluginManager;
-		this.executorService = executorService;
 		this.configPanelProvider = configPanelProvider;
 		this.openOSRSConfig = openOSRSConfig;
 
@@ -182,6 +179,14 @@ public class PluginListPanel extends PluginPanel
 				});
 			}
 		});
+
+		eventBus.subscribe(ExternalPluginsLoaded.class, this, ignored -> {
+			eventBus.subscribe(ExternalPluginChanged.class, this, ev -> SwingUtilities.invokeLater(this::rebuildPluginList));
+
+			SwingUtilities.invokeLater(this::rebuildPluginList);
+		});
+
+		eventBus.subscribe(PluginChanged.class, this, this::onPluginChanged);
 
 		muxer = new MultiplexingPluginPanel(this);
 
@@ -417,36 +422,30 @@ public class PluginListPanel extends PluginPanel
 
 	void startPlugin(Plugin plugin)
 	{
-		executorService.submit(() ->
-		{
-			pluginManager.setPluginEnabled(plugin, true);
+		pluginManager.setPluginEnabled(plugin, true);
 
-			try
-			{
-				pluginManager.startPlugin(plugin);
-			}
-			catch (PluginInstantiationException ex)
-			{
-				log.warn("Error when starting plugin {}", plugin.getClass().getSimpleName(), ex);
-			}
-		});
+		try
+		{
+			pluginManager.startPlugin(plugin);
+		}
+		catch (PluginInstantiationException ex)
+		{
+			log.warn("Error when starting plugin {}", plugin.getClass().getSimpleName(), ex);
+		}
 	}
 
 	void stopPlugin(Plugin plugin)
 	{
-		executorService.submit(() ->
-		{
-			pluginManager.setPluginEnabled(plugin, false);
+		pluginManager.setPluginEnabled(plugin, false);
 
-			try
-			{
-				pluginManager.stopPlugin(plugin);
-			}
-			catch (PluginInstantiationException ex)
-			{
-				log.warn("Error when stopping plugin {}", plugin.getClass().getSimpleName(), ex);
-			}
-		});
+		try
+		{
+			pluginManager.stopPlugin(plugin);
+		}
+		catch (PluginInstantiationException ex)
+		{
+			log.warn("Error when stopping plugin {}", plugin.getClass().getSimpleName(), ex);
+		}
 	}
 
 	private List<String> getPinnedPluginNames()
@@ -471,7 +470,6 @@ public class PluginListPanel extends PluginPanel
 		configManager.setConfiguration(RUNELITE_GROUP_NAME, PINNED_PLUGINS_CONFIG_KEY, value);
 	}
 
-	@Subscribe
 	public void onPluginChanged(PluginChanged event)
 	{
 		SwingUtilities.invokeLater(this::refresh);
