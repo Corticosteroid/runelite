@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017, Adam <Adam@sigterm.info>
+ * Copyright (c) 2019 Owain van Brakel <https://github.com/Owain94>
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -22,23 +22,14 @@
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package net.runelite.cache.definitions;
+package net.runelite.client.events;
 
 import lombok.Data;
+import net.runelite.api.events.Event;
 
 @Data
-public class KitDefinition
+public class ExternalRepositoryChanged implements Event
 {
-	private final int id;
-	public short[] recolorToReplace;
-	public short[] recolorToFind;
-	public short[] retextureToFind;
-	public short[] retextureToReplace;
-	public int bodyPartId = -1;
-	public int[] models;
-	public int[] chatheadModels = new int[]
-	{
-		-1, -1, -1, -1, -1
-	};
-	public boolean nonSelectable = false;
+	private final String owner;
+	private final boolean added;
 }
