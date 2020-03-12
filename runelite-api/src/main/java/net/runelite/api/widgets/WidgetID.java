@@ -167,6 +167,7 @@ public class WidgetID
 	public static final int GWD_KC_GROUP_ID = 406;
 	public static final int ADVENTURE_LOG_ID = 187;
 	public static final int COUNTERS_LOG_GROUP_ID = 625;
+	public static final int GAUNTLET_TIMER_GROUP_ID = 637;
 
 	static class WorldMap
 	{
@@ -729,6 +730,7 @@ public class WidgetID
 		static final int LIGHT_BOX = 1;
 		static final int LIGHT_BOX_WINDOW = 2;
 		static final int LIGHT_BULB_CONTAINER = 3;
+		static final int LIGHT_BOX_BUTTON_CONTAINER = 6;
 		static final int BUTTON_A = 8;
 		static final int BUTTON_B = 9;
 		static final int BUTTON_C = 10;
@@ -1206,9 +1208,9 @@ public class WidgetID
 
 	static class Options
 	{
-		static final int MUSIC_SLIDER = 38;
-		static final int SOUND_EFFECT_SLIDER = 44;
-		static final int AREA_SOUND_SLIDER = 50;
+		static final int MUSIC_SLIDER = 37;
+		static final int SOUND_EFFECT_SLIDER = 43;
+		static final int AREA_SOUND_SLIDER = 49;
 	}
 
 	static class AchievementDiary
@@ -1228,7 +1230,7 @@ public class WidgetID
 
 	static class LmsKDA
 	{
-		static final int INFO = 4;
+		static final int INFO = 5;
 	}
 
 	static class AdventureLog
@@ -1240,5 +1242,10 @@ public class WidgetID
 	{
 		static final int OWNER = 4;
 		static final int TEXT = 6;
+	}
+
+	static class GauntletTimer
+	{
+		static final int CONTAINER = 2;
 	}
 }
